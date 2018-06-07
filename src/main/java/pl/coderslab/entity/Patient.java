@@ -86,6 +86,10 @@ public class Patient {
 		return id;
 	}
 
+	public void setId(long id) {
+		this.id = id;
+	}
+
 	public List<Icd10> getDiseaseCode() {
 		return diseaseCode;
 	}
