@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,7 +17,6 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.pl.PESEL;
-import org.mindrot.jbcrypt.BCrypt;
 
 @Entity
 @Table(name = "patients")
@@ -36,10 +36,10 @@ public class Patient {
 	@NotEmpty
 	@Size(min = 9, max = 11)
 	private String phone;
-	@OneToMany(cascade = CascadeType.MERGE)
+	@OneToMany(cascade = CascadeType.MERGE /*, Fetch = FetchType.EAGER*/ )
 	private List<Icd10> diseaseCode = new ArrayList<>();
-	
-	@OneToMany(cascade = CascadeType.MERGE)
+
+	@OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
 	private List<Icd9> procedureCode = new ArrayList<>();
 
 	public String getFirstName() {

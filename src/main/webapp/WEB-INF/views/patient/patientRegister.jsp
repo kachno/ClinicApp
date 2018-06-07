@@ -37,18 +37,11 @@
 			<form:errors path="pesel" />
 		</div>
 		<div>
-			Kod ICD9:
-			<input name="code9" />
-		</div>
-		<div>
-			Kod ICD10:
-			<input name="code10" />
-		</div>
-		<div>
 			<input type="submit" name="Submit" value="Zatwierdź" />
 
 		</div>
 	</form:form>
+	<div><a href="/Clinic_Registration/patient/all">Zarządzanie pacjentami</a></div>
 	 <%@ include file="/WEB-INF/views/jspf/footer.jspf"%>
 </body>
 </html>

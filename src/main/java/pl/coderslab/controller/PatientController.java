@@ -1,6 +1,5 @@
 package pl.coderslab.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -40,25 +39,14 @@ public class PatientController {
 	}
 
 	@PostMapping("/form")
-	public String formPost(@Valid Patient patient, @RequestParam("code10") String code10, @RequestParam("code9") String code9, BindingResult result) {
+	public String formPost(@Valid Patient patient, BindingResult result) {
 		if (result.hasErrors()) {
 			return "patient/patientRegister";
 		}
 		if (this.patientRepository.findByPesel(patient.getPesel()) != null) {
 
 		}
-		Icd10 list10 = this.icd10Repo.findByCode10(code10);
-		Icd9 list9 = this.icd9Repo.findByCode9(code9);
-		
-		List<Icd9> icd9list = new ArrayList<>();
-		icd9list.add(list9);
-		
-		List<Icd10> icd10list = new ArrayList<>();
-		icd10list.add(list10);
-		
-		patient.setProcedureCode(icd9list);
-		patient.setDiseaseCode(icd10list);
-		
+
 		this.patientRepository.save(patient);
 		return "redirect:/patient/all";
 	}
@@ -70,11 +58,7 @@ public class PatientController {
 
 	@GetMapping("/{id}/edit")
 	public String edit(@PathVariable long id, Model model) {
-		List<Icd10> disease = this.icd10Repo.findAll();
-		List<Icd9> procedure = this.icd9Repo.findAll();
 		Patient patient = this.patientRepository.findOne(id);
-		patient.setDiseaseCode(disease);
-		patient.setProcedureCode(procedure);
 		model.addAttribute("patient", patient);
 		return "patient/patientRegister";
 	}
@@ -100,4 +84,83 @@ public class PatientController {
 		return this.patientRepository.findAll();
 	}
 
+	@GetMapping("/{id}/procedure/{procedureId}/del")
+	public String removeAssignedProcedure(@PathVariable long id, @PathVariable long procedureId, Model model) {
+		Patient patient = this.patientRepository.findOne(id);
+		List<Icd9> procedures = patient.getProcedureCode();
+
+		patient.getProcedureCode().removeIf(procedure1 -> {
+			if (procedure1.getId() == procedureId) {
+				return true;
+			} else {
+				return false;
+			}
+		});
+
+		this.patientRepository.save(patient);
+		return "redirect:/patient/all";
+	}
+
+	@GetMapping("/procedure/{id}/assign")
+	public String assignProcedureForm(@PathVariable long id, Model model) {
+		model.addAttribute("patient", patientRepository.findOne(id));
+		return "patient/assignProcedureForm";
+	}
+
+	@PostMapping("/procedure/{id}/assign")
+	public String assignProcedure(@PathVariable long id, Model model, @RequestParam("procedureId") long procedureId) {
+
+		Patient patient = patientRepository.findOne(id);
+		Icd9 procedure = icd9Repo.findOne(procedureId);
+		patient.getProcedureCode().add(procedure);
+
+		patientRepository.save(patient);
+
+		return "redirect:/patient/all";
+	}
+
+//	@GetMapping("/{id}/disease/{diseaseId}/del")
+//	public String removeAssignedDisease(@PathVariable long id, @PathVariable long diseaseId, Model model) {
+//		Patient patient = this.patientRepository.findOne(id);
+//		List<Icd10> procedures = patient.getDiseaseCode();
+//
+//		patient.getDiseaseCode().removeIf(disease1 -> {
+//			if (disease1.getId() == diseaseId) {
+//				return true;
+//			} else {
+//				return false;
+//			}
+//		});
+//
+//		this.patientRepository.save(patient);
+//		return "redirect:/patient/all";
+//	}
+//
+//	@GetMapping("/disease/{id}/assign")
+//	public String assignDiseaseForm(@PathVariable long id, Model model) {
+//		model.addAttribute("patient", patientRepository.findOne(id));
+//		return "patient/assignDiseaseForm";
+//	}
+//
+//	@PostMapping("/disease/{id}/assign")
+//	public String assignDisease(@PathVariable long id, Model model, @RequestParam("diseaseId") long diseaseId) {
+//
+//		Patient patient = patientRepository.findOne(id);
+//		Icd10 disease = icd10Repo.findOne(diseaseId);
+//		patient.getDiseaseCode().add(disease);
+//
+//		patientRepository.save(patient);
+//
+//		return "redirect:/patient/all";
+//	}
+
+	@ModelAttribute("procedures")
+	public List<Icd9> getProcedures() {
+		return this.icd9Repo.findAll();
+	}
+
+	@ModelAttribute("diseases")
+	public List<Icd10> getDiseases() {
+		return this.icd10Repo.findAll();
+	}
 }
